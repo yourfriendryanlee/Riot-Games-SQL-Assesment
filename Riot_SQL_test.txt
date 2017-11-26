@@ -1,0 +1,211 @@
+with data as exactly provided
+with data in realistic settings
+with data that is prone to change
+
+1) Library Books
+
+SELECT
+
+A.Name Library_Name,
+COUNT(B.IBSN) Book_Count
+
+FROM
+
+Library as A,
+Book as B
+
+WHERE
+
+B.Library_id = A.Library_id
+
+GROUP BY
+
+A.Name
+
+2) Second Transaction
+
+Query Desc.
+This query returns our Account Id, the date of the account's second purchase, and the maximum amount (in general) the account has spent. 
+The data is from the transactions table. 
+
+Limitations:
+
+Improvements:
+
+My Query:
+
+SELECT account_id, 
+
+
+3) Account Login
+
+SELECT account_id, realm_id, max(total_loggedin_seconds)
+FROM platform_accounts
+GROUP BY account_id, realm_id;
+
+4) Survey Data
+
+5) Jinx and Vi
+a.
+
+SELECT game_date, account_id, MAX(num_win) most_win
+FROM
+(
+SELECT game_date, account_id, SUM(win_flag) num_win
+FROM player_games
+WHERE champion = 'Jinx'
+GROUP BY game_date, account_id
+)
+GROUP BY game_date, account_id;
+
+b.
+SELECT game_id
+FROM
+(
+SELECT game_id, DISTINCT(champion), DISTINCT(team_id)
+FROM
+player_games
+WHERE champion = 'Jinx' OR champion = 'Vi'
+)
+WHERE COUNT(DISTINCT team_id) > 1;
+
+6) Player Metrics by Champion
+
+player games
+player monthly summary
+
+Create Table player_games(
+account_id int,
+game_id int,
+game_date int,
+game_type varchar(200),
+champion varchar(200),
+team_id int,
+win_flag int
+);
+
+insert into player_games
+Values (11, 21, 50, srnormal, garen, 1, 0);
+
+insert into player_games
+Values (22, 22, 51, srranked, vi, 2, 0);
+
+insert into player_games
+Values (33, 23, 52, srnormal, vi, 1, 1);
+
+insert into player_games
+Values (44, 24, 52, srnormal, jinx, 2, 0);
+
+
+Create Table player_monthly_summary(
+account_id int,
+month_date int,
+games_played int,
+usd_spent int
+);
+
+insert into player_monthly_summary
+Values (11, 100, 3, NULL);
+
+insert into player_monthly_summary
+Values (11, 200, 14, 10);
+
+insert into player_monthly_summary
+Values (22, 200, 42, 7);
+
+insert into player_monthly_summary
+Values (33, 200, 13, 5);
+
+
+
+SELECT
+pg.champion
+, pms.month_date
+, count(distinct pms.account_id) as accounts
+, sum(games_played) as games_played_total
+, sum(usd_spent) as usd_spent_total
+, sum(games_played)/count(distinct pms.account_id) as
+games_played_per_account
+, sum(usd_spent)/count(distinct pms.account_id) as usd_spent_per_account
+FROM
+player_monthly_summary pms,
+player_games pg
+WHERE
+pg.account_id = pms.account_id
+AND
+month(pg.game_date) = month(pms.month_date)
+GROUP BY pg.champion, pms.month_date;
+
+
+
+7) Debug Query
+
+much do they play or spend?
+
+SELECT
+account_id
+, month_date
+, games_played
+, CASE WHEN usd_spent = NULL THEN 0 ELSE usd_spent
+FROM player_monthly_summary pms
+JOIN (
+-- monthly Jinx players
+SELECT
+account_id
+, date_trunc(month, (game_date) as month_date
+, champion
+, count(*) as jinx_game_count
+FROM player_games
+WHERE champion = "Jinx"
+GROUP BY account_id, champion
+) pg
+ON pms.account_id = pg.account_id
+AND pms.month_date = pg.game_date
+JOIN (
+-- monthly Vi players
+SELECT
+account_id
+, date_trunc(month, (game_date) as month_date
+, champion
+, count(*) as vi_game_count
+FROM player_games
+WHERE champion = "Vi"
+GROUP BY account_id, game_date
+) pg
+ON pms.account_id = pg.account_id
+WHERE jinx_game_count = 0 or vi_game_count = 0
+
+8) Account Sampling
+
+SELECT column FROM table
+ORDER BY RAND()
+LIMIT 1000
+
+9) String Detection
+
+SELECT column from table where LOWER(comments) LIKE '%n%o%b%' or LOWER(comments) LIKE '%n%0%b%'
+
+10) Magnitude Estimation
+a how many people in your hometown own cars?
+
+I live in Pasadena, CA. For this excercise, I am going to assume each individual lives in a household
+(vs incarcerated). The population of Pasadena is approaching 145,000.
+The average household in America holds 2.58 people. Therefore, there are 145,00/2.58 = 56,202 households in Pasadena.
+There is also about 1 car for every two people in America.
+Thus, the average household owns 1.3 cars, and if there are 56,202 households
+in Pasadena, then there are 56,202*1.3 = 73062 vehicles in Pasadena.
+
+b how many cheerios are in a box?
+
+I would start my taking
+
+c how many pizzas are delivered in Los Angeles each week?
+
+There are 21 million people in the Los Angeles metro-politan area.
+Let us assume that each person eats pizza once every 1.5 weeks.
+In any given week, that means 14 million people ate pizza.
+Let us assume that half of these people ordered their pizza instead of picking up.
+That means that 7 million pizzas are delivered every week in the Greater Los Angeles Area.
+
+
+
